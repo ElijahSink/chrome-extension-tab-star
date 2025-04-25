@@ -1,0 +1,32 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    name: Publish webextension
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 20
+    - name: Zip the extension
+      run: 
+        zip -r chrome-extension-${GITHUB_REF##*/}.zip . -x ".github/*" ".git/*"
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: chrome-extension-${GITHUB_REF##*/}.zip
+    - name: Upload & release
+      uses: mnao305/chrome-extension-upload@v5.0.0
+      with:
+        file-path: dist/file.zip
+        extension-id: tabstar
+        client-id: ${{ secrets.CLIENT_ID }}
+        client-secret: ${{ secrets.CLIENT_SECRET }}
+        refresh-token: ${{ secrets.REFRESH_TOKEN }}
