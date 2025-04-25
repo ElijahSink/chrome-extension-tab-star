@@ -68,7 +68,7 @@ function checkForMatch(url, title, tabId) {
         let groupName = pattern.groupName;
         
         if (match.length > 1 && pattern.useCapture) {
-          groupName = match[1]; // Use the first capture group
+          groupName = match[1]; // Use the first capture group as the group name
         }
         
         let color = pattern.color;

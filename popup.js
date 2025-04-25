@@ -1,7 +1,6 @@
 let currentPatternId = null;
 let selectedColor = 'blue';
 
-// Get elements
 const patternList = document.getElementById('patternList');
 const regexPattern = document.getElementById('regexPattern');
 const groupName = document.getElementById('groupName');
@@ -10,15 +9,12 @@ const useRandomColor = document.getElementById('useRandomColor');
 const addPatternBtn = document.getElementById('addPattern');
 const applyToCurrentBtn = document.getElementById('applyToCurrent');
 
-// Initialize selected color
 document.querySelector(`.color-option[data-color="blue"]`).classList.add('selected');
 
-// Load existing patterns when popup opens
 document.addEventListener('DOMContentLoaded', () => {
   loadPatterns();
 });
 
-// Color option selection
 document.querySelectorAll('.color-option').forEach(option => {
   option.addEventListener('click', () => {
     document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
@@ -27,7 +23,6 @@ document.querySelectorAll('.color-option').forEach(option => {
   });
 });
 
-// Add or update pattern
 addPatternBtn.addEventListener('click', () => {
   console.log('Add Pattern button clicked');
   const regex = regexPattern.value.trim();
@@ -39,7 +34,6 @@ addPatternBtn.addEventListener('click', () => {
     return;
   }
   
-  // Test if the regex is valid
   try {
     new RegExp(regex);
     console.log('Regex validation passed:', regex);
@@ -77,7 +71,6 @@ addPatternBtn.addEventListener('click', () => {
   );
 });
 
-// Apply to current tab
 applyToCurrentBtn.addEventListener('click', () => {
   chrome.runtime.sendMessage(
     { action: 'applyToCurrentTab' },
@@ -91,14 +84,19 @@ applyToCurrentBtn.addEventListener('click', () => {
   );
 });
 
-// Load patterns from storage
+/**
+ * Loads regex patterns from background script storage
+ */
 function loadPatterns() {
   chrome.runtime.sendMessage({ action: 'getPatterns' }, response => {
     renderPatterns(response.patterns || []);
   });
 }
 
-// Render pattern list
+/**
+ * Renders the list of patterns in the popup UI
+ * @param {Array} patterns - Array of regex pattern objects
+ */
 function renderPatterns(patterns) {
   if (patterns.length === 0) {
     patternList.innerHTML = '<div class="no-patterns">No patterns added yet.</div>';
@@ -142,7 +140,6 @@ function renderPatterns(patterns) {
     deleteBtn.textContent = 'Delete';
     deleteBtn.addEventListener('click', () => deletePattern(pattern.id));
     
-    // Add color indicator
     const colorIndicator = document.createElement('span');
     colorIndicator.style.display = 'inline-block';
     colorIndicator.style.width = '10px';
@@ -150,7 +147,6 @@ function renderPatterns(patterns) {
     colorIndicator.style.borderRadius = '50%';
     colorIndicator.style.marginRight = '5px';
     
-    // Set the background color based on pattern.color
     switch (pattern.color) {
       case 'grey': colorIndicator.style.backgroundColor = '#9AA0A6'; break;
       case 'blue': colorIndicator.style.backgroundColor = '#4285F4'; break;
@@ -179,7 +175,10 @@ function renderPatterns(patterns) {
   });
 }
 
-// Edit a pattern
+/**
+ * Populates the form with pattern data for editing
+ * @param {Object} pattern - The pattern object to edit
+ */
 function editPattern(pattern) {
   currentPatternId = pattern.id;
   regexPattern.value = pattern.regex;
@@ -187,7 +186,6 @@ function editPattern(pattern) {
   useCapture.checked = pattern.useCapture;
   useRandomColor.checked = pattern.useRandomColor || false;
   
-  // Set the selected color
   document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
   document.querySelector(`.color-option[data-color="${pattern.color}"]`).classList.add('selected');
   selectedColor = pattern.color;
@@ -195,7 +193,10 @@ function editPattern(pattern) {
   addPatternBtn.textContent = 'Update Pattern';
 }
 
-// Delete a pattern
+/**
+ * Deletes a pattern after confirmation
+ * @param {string|number} id - The ID of the pattern to delete
+ */
 function deletePattern(id) {
   if (confirm('Are you sure you want to delete this pattern?')) {
     chrome.runtime.sendMessage(
@@ -212,7 +213,11 @@ function deletePattern(id) {
   }
 }
 
-// Toggle pattern active state
+/**
+ * Toggles the active state of a pattern
+ * @param {string|number} id - The ID of the pattern to toggle
+ * @param {boolean} active - Whether the pattern should be active
+ */
 function togglePattern(id, active) {
   chrome.runtime.sendMessage(
     { action: 'getPatterns' },
@@ -235,7 +240,9 @@ function togglePattern(id, active) {
   );
 }
 
-// Reset form to add new pattern
+/**
+ * Resets the pattern form to add a new pattern
+ */
 function resetForm() {
   currentPatternId = null;
   regexPattern.value = '';
