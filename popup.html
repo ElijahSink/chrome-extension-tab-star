@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TabStar</title>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 400px;
+      padding: 10px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    }
+    
+    h1 {
+      text-align: center;
+      font-size: 20px;
+      margin-top: 0;
+      color: #444;
+    }
+    
+    .pattern-list {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .pattern-item {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    
+    .pattern-item:last-child {
+      border-bottom: none;
+    }
+    
+    .pattern-item .toggle {
+      margin-right: 10px;
+    }
+    
+    .pattern-info {
+      flex-grow: 1;
+    }
+    
+    .pattern-info h3 {
+      margin: 0;
+      font-size: 14px;
+    }
+    
+    .pattern-info p {
+      margin: 5px 0 0;
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .pattern-actions {
+      display: flex;
+    }
+    
+    .btn {
+      background-color: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 5px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-left: 5px;
+      transition: background-color 0.2s;
+    }
+    
+    .btn:hover {
+      background-color: #e0e0e0;
+    }
+    
+    .btn-primary {
+      background-color: #4285f4;
+      color: white;
+      border-color: #3367d6;
+    }
+    
+    .btn-primary:hover {
+      background-color: #3367d6;
+    }
+    
+    .btn-danger {
+      background-color: #ea4335;
+      color: white;
+      border-color: #d33426;
+    }
+    
+    .btn-danger:hover {
+      background-color: #d33426;
+    }
+    
+    .form-group {
+      margin-bottom: 10px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+    
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+    }
+    
+    .checkbox-group input {
+      width: auto;
+      margin-right: 5px;
+    }
+    
+    .color-options {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    
+    .color-option {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin: 5px;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    
+    .color-option.selected {
+      border-color: #000;
+    }
+    
+    .no-patterns {
+      padding: 20px;
+      text-align: center;
+      color: #666;
+    }
+    
+    .info-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>TabStar</h1>
+  
+  <div id="patternList" class="pattern-list">
+    <div class="no-patterns">No patterns added yet.</div>
+  </div>
+  
+  <div id="patternForm">
+    <div class="form-group">
+      <label for="regexPattern">URL Regex Pattern:</label>
+      <input type="text" id="regexPattern" placeholder="e.g. github.com/([^/]+)">
+    </div>
+    
+    <div class="form-group">
+      <label for="groupName">Default Group Name:</label>
+      <input type="text" id="groupName" placeholder="e.g. GitHub">
+      <div class="info-text">This will be used if no capture groups are matched or if "Use Capture Group" is disabled</div>
+    </div>
+    
+    <div class="form-group checkbox-group">
+      <input type="checkbox" id="useCapture" checked>
+      <label for="useCapture">Use Capture Group as Group Name</label>
+    </div>
+    
+    <div class="form-group checkbox-group">
+      <input type="checkbox" id="useRandomColor">
+      <label for="useRandomColor">Use Random Colors for Multiple Groups</label>
+    </div>
+    
+    <div class="form-group">
+      <label>Group Color:</label>
+      <div class="color-options">
+        <div class="color-option" data-color="grey" style="background-color: #9AA0A6;"></div>
+        <div class="color-option" data-color="blue" style="background-color: #4285F4;"></div>
+        <div class="color-option" data-color="red" style="background-color: #EA4335;"></div>
+        <div class="color-option" data-color="yellow" style="background-color: #FBBC04;"></div>
+        <div class="color-option" data-color="green" style="background-color: #34A853;"></div>
+        <div class="color-option" data-color="pink" style="background-color: #F6AEA9;"></div>
+        <div class="color-option" data-color="purple" style="background-color: #A142F4;"></div>
+        <div class="color-option" data-color="cyan" style="background-color: #24C1E0;"></div>
+      </div>
+    </div>
+    
+    <button id="addPattern" class="btn btn-primary">Add Pattern</button>
+    <button id="applyToCurrent" class="btn">Apply to Current Tab</button>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
