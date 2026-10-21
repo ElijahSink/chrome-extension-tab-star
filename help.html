@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TabStar Status - Targeting the status field</title>
+  <style>
+    body { max-width: 760px; margin: 40px auto; padding: 0 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #222; line-height: 1.55; }
+    h1 { font-size: 26px; } h2 { font-size: 20px; margin-top: 32px; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; background: #f1f3f4; border-radius: 4px; }
+    code { padding: 1px 5px; } pre { padding: 12px; overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; font-size: 14px; }
+    th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; vertical-align: top; }
+    th { background: #f7f7f7; }
+    .tip { border-left: 4px solid #4285f4; background: #e8f0fe; padding: 8px 12px; margin: 16px 0; }
+  </style>
+</head>
+<body>
+  <h1>Targeting the status field</h1>
+  <p>
+    TabStar Status appends a short piece of text from a web page to the tab group name, for example
+    <code>ABC-123 - In Progress</code>. You tell it <em>which</em> text by giving a CSS selector for the element
+    that holds the status. This page explains how to find a selector that keeps working.
+  </p>
+
+  <h2>What a CSS selector is</h2>
+  <p>
+    A CSS selector is the address of one element on a web page. Web developers use selectors to style elements;
+    TabStar Status uses one to find the element whose text it should copy into the group title.
+  </p>
+  <table>
+    <tr><th>Selector</th><th>Reads as</th></tr>
+    <tr><td><code>#status-val</code></td><td>the element with <code>id="status-val"</code></td></tr>
+    <tr><td><code>[data-testid="header-state"]</code></td><td>the element whose <code>data-testid</code> attribute equals <code>header-state</code></td></tr>
+    <tr><td><code>input[aria-label="State Field"]</code></td><td>an <code>&lt;input&gt;</code> whose <code>aria-label</code> equals <code>State Field</code></td></tr>
+    <tr><td><code>.gh-header-meta .State</code></td><td>an element with class <code>State</code> inside one with class <code>gh-header-meta</code></td></tr>
+  </table>
+  <p>
+    The extension takes the first matching element that has any text, trims it, and appends it to the group
+    title after <code> - </code>. For inputs and dropdowns it uses the current value.
+  </p>
+
+  <h2>Rule name vs. tab group title</h2>
+  <p>
+    <strong>Rule Name</strong> is only a label in the popup list. <strong>Tab Group Title</strong> is what the
+    group is actually called; <code>$1</code>, <code>$2</code>… insert the parts of the URL you wrapped in
+    parentheses in the regex. Plain text gives every matching tab one fixed group.
+  </p>
+
+  <h2>1. Try a preset first</h2>
+  <p>
+    The popup has a <strong>Start from a preset</strong> menu for Jira, GitHub, GitLab, Azure DevOps and
+    ServiceNow. A preset fills in the URL regex, group name template and selector. Presets marked
+    <em>(unverified)</em> are best-effort starting points: open a matching page and click
+    <strong>Test on Current Tab</strong> to confirm they work for your instance.
+  </p>
+
+  <h2>2. Find the element in DevTools</h2>
+  <ol>
+    <li>Open the page that shows the status (the ticket, pull request, incident, and so on).</li>
+    <li>Right-click the status text or badge and choose <strong>Inspect</strong>. DevTools opens with the element highlighted.</li>
+    <li>If the highlighted element is a tiny inner <code>&lt;span&gt;</code>, look one or two levels up for a
+      parent with a stable identifying attribute.</li>
+    <li>Right-click the element in the Elements panel and choose <strong>Copy &rsaquo; Copy selector</strong>
+      as a starting point, then simplify it (see below).</li>
+  </ol>
+
+  <h2>3. Prefer stable attributes</h2>
+  <p>Generated class names such as <code>.css-1x9kq2</code> change on every deploy. Choose, in this order:</p>
+  <table>
+    <tr><th>Attribute</th><th>Example selector</th></tr>
+    <tr><td><code>data-testid</code> / <code>data-test-id</code></td><td><code>[data-testid="header-state"]</code></td></tr>
+    <tr><td><code>id</code></td><td><code>#status-val</code></td></tr>
+    <tr><td><code>aria-label</code></td><td><code>input[aria-label="State Field"]</code></td></tr>
+    <tr><td>Semantic class names</td><td><code>.gh-header-meta .State</code></td></tr>
+  </table>
+  <div class="tip">
+    Attribute suffix matching helps when ids are prefixed: <code>select[id$=".state"]</code> matches
+    <code>incident.state</code>, <code>problem.state</code> and so on.
+  </div>
+
+  <h2>4. Verify in the Console</h2>
+  <p>Paste your selector into the DevTools Console to see exactly what the extension will read:</p>
+  <pre>document.querySelector('[data-testid="header-state"]').textContent.trim()</pre>
+  <p>
+    If the status lives in an <code>&lt;input&gt;</code> or <code>&lt;select&gt;</code>, the extension uses the
+    input's value or the selected option's text automatically. In the console use <code>.value</code> instead.
+  </p>
+
+  <h2>5. Add fallbacks</h2>
+  <p>
+    Separate several selectors with commas. They are tried in the order written; the first one that finds an
+    element with non-empty text wins. Put the most specific first and avoid a generic last resort such as
+    <code>.badge</code>: pages often contain other badges (GitLab shows a "Beta" label, for example) that would be
+    read when the specific ones miss. This is how the Jira preset covers Cloud and Data Center in one rule:
+  </p>
+  <pre>[data-testid="issue.views.issue-base.foundation.status.status-field-wrapper"] button, #status-val</pre>
+
+  <h2>Reading more than one thing</h2>
+  <p>
+    A rule can have several <strong>status fields</strong>. Each reads one element; the values are joined with
+    <code> · </code>. The GitLab merge request preset uses two fields to show the MR state and its pipeline:
+  </p>
+  <table>
+    <tr><th>Field</th><th>Selector</th><th>Keep only</th><th>Label</th><th>Reads</th></tr>
+    <tr><td>1</td><td><code>.detail-page-header .gl-badge-content</code></td><td></td><td></td><td><code>Open</code></td></tr>
+    <tr><td>2</td><td><code>.mr-pipeline-title</code></td><td><code>#\d+\s+(\S+)</code></td><td><code>CI</code></td><td><code>CI passed</code></td></tr>
+  </table>
+  <p>Result: <code>www!42 - Open · CI passed</code>.</p>
+  <p>
+    <strong>Keep only</strong> is a regex applied to the element's text; with parentheses, only that part is kept.
+    The pipeline widget says "Pipeline #18395789 passed", and <code>#\d+\s+(\S+)</code> keeps the word after the
+    number. <strong>Label</strong> is a plain prefix. A field whose element never appears is left out.
+  </p>
+
+  <h2>6. Test, then save</h2>
+  <p>
+    In the popup, click <strong>Test on Current Tab</strong>. Nothing is grouped. The result shows the group
+    title the rule would produce, the status text the selector found, <strong>Read from</strong> (which element
+    supplied it) and a preview of the final title. If you see:
+  </p>
+  <table>
+    <tr><th>Result</th><th>Meaning</th></tr>
+    <tr><td>regex did not match</td><td>The URL regex does not match the current URL or tab title. Check escaping (<code>\.</code> for dots).</td></tr>
+    <tr><td>access was not granted</td><td>You declined site access. Click Test again and allow it.</td></tr>
+    <tr><td>matched no element within 3 seconds</td><td>The selector is wrong, or the element renders very late. Re-inspect and try a parent element.</td></tr>
+    <tr><td>matched N element(s) but none had any text</td><td>You selected a wrapper or an icon. Try the parent, or the inner element that holds the words.</td></tr>
+    <tr><td>"Keep only" regex did not match</td><td>The raw element text is shown; adjust the regex to it.</td></tr>
+  </table>
+
+  <h2>Keeping titles short</h2>
+  <p>
+    Chrome renders a tab group title on one line and truncates it when the tab strip is crowded, cutting off the
+    end, which is where the status lives. The popup's <strong>Max group title length</strong> setting shortens
+    the base name instead and always keeps the status:
+  </p>
+  <table>
+    <tr><th>Setting</th><th>Title</th></tr>
+    <tr><td>0 (no limit)</td><td><code>perimeterx-lambda-at-edge pipeline #18395616 - Blocked</code></td></tr>
+    <tr><td>32</td><td><code>perimeterx-lambda-at-… - Blocked</code></td></tr>
+    <tr><td>20</td><td><code>perimeter… - Blocked</code></td></tr>
+  </table>
+  <p>
+    The base is never cut below 8 characters, so ticket keys like <code>ABC-123</code> stay whole even if that
+    means the title exceeds the limit with a very long status. Limits below 12 are raised to 12. Changing the
+    setting re-titles all open groups. Short templates and labels help too:
+    <code>$1 !$2</code> beats <code>$1 merge request #$2</code>.
+  </p>
+
+  <h2>Things to know</h2>
+  <ul>
+    <li><strong>Frames.</strong> The reader searches the main page and every same-origin iframe, so classic
+      ServiceNow forms work.</li>
+    <li><strong>Live updates.</strong> After the first read the extension watches the page. Changing the status
+      without reloading also renames the group.</li>
+    <li><strong>Timing.</strong> On load the reader waits up to 10 seconds for the element to appear. The Test
+      button waits 3 seconds.</li>
+    <li><strong>Permissions.</strong> The extension only reads sites you explicitly grant. Each rule stores the
+      origin you entered, and the prompt appears when you save or test.</li>
+  </ul>
+</body>
+</html>

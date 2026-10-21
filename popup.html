@@ -1,30 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>TabStar</title>
+  <title>TabStar Status</title>
   <meta charset="utf-8">
   <style>
     body {
-      width: 400px;
+      width: 440px;
       padding: 10px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
     }
-    
+
     h1 {
       text-align: center;
       font-size: 20px;
       margin-top: 0;
       color: #444;
     }
-    
+
+    h2 {
+      font-size: 14px;
+      margin: 14px 0 6px;
+      color: #444;
+    }
+
+    code {
+      font-size: 11px;
+      background: #f1f3f4;
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
     .pattern-list {
-      max-height: 300px;
+      max-height: 200px;
       overflow-y: auto;
       margin-bottom: 15px;
       border: 1px solid #ddd;
       border-radius: 4px;
     }
-    
+
     .pattern-item {
       padding: 10px;
       border-bottom: 1px solid #eee;
@@ -32,34 +45,48 @@
       align-items: center;
       position: relative;
     }
-    
+
     .pattern-item:last-child {
       border-bottom: none;
     }
-    
+
     .pattern-item .toggle {
       margin-right: 10px;
     }
-    
+
     .pattern-info {
       flex-grow: 1;
+      min-width: 0;
     }
-    
+
     .pattern-info h3 {
       margin: 0;
       font-size: 14px;
     }
-    
+
     .pattern-info p {
-      margin: 5px 0 0;
+      margin: 4px 0 0;
       font-size: 12px;
       color: #666;
+      overflow-wrap: anywhere;
     }
-    
+
+    .status-badge {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 10px;
+      background: #e8f0fe;
+      color: #1a56c4;
+      vertical-align: middle;
+    }
+
     .pattern-actions {
       display: flex;
     }
-    
+
     .btn {
       background-color: #f0f0f0;
       border: 1px solid #ddd;
@@ -70,65 +97,86 @@
       margin-left: 5px;
       transition: background-color 0.2s;
     }
-    
+
     .btn:hover {
       background-color: #e0e0e0;
     }
-    
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: progress;
+    }
+
     .btn-primary {
       background-color: #4285f4;
       color: white;
       border-color: #3367d6;
     }
-    
+
     .btn-primary:hover {
       background-color: #3367d6;
     }
-    
+
     .btn-danger {
       background-color: #ea4335;
       color: white;
       border-color: #d33426;
     }
-    
+
     .btn-danger:hover {
       background-color: #d33426;
     }
-    
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .btn-row .btn {
+      margin-left: 0;
+    }
+
     .form-group {
       margin-bottom: 10px;
     }
-    
+
     .form-group label {
       display: block;
       font-size: 13px;
       font-weight: 500;
       margin-bottom: 3px;
     }
-    
+
     .form-group input, .form-group select {
       width: 100%;
       padding: 6px 8px;
       border: 1px solid #ddd;
       border-radius: 4px;
       font-size: 13px;
+      box-sizing: border-box;
     }
-    
+
     .checkbox-group {
       display: flex;
       align-items: center;
     }
-    
+
     .checkbox-group input {
       width: auto;
       margin-right: 5px;
     }
-    
+
+    .checkbox-group label {
+      margin-bottom: 0;
+    }
+
     .color-options {
       display: flex;
       flex-wrap: wrap;
     }
-    
+
     .color-option {
       width: 20px;
       height: 20px;
@@ -137,53 +185,272 @@
       cursor: pointer;
       border: 2px solid transparent;
     }
-    
+
     .color-option.selected {
       border-color: #000;
     }
-    
+
     .no-patterns {
       padding: 20px;
       text-align: center;
       color: #666;
     }
-    
+
     .info-text {
       font-size: 12px;
       color: #666;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .warn-text {
+      color: #b06000;
+    }
+
+    .section {
+      border: 1px solid #e3e3e3;
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #fafafa;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .section-header .checkbox-group label {
+      font-weight: 600;
+    }
+
+    .help-link {
+      font-size: 12px;
+      color: #1a56c4;
+    }
+
+    details.explainer {
+      font-size: 12px;
+      color: #444;
+      background: #fff;
+      border: 1px solid #e3e3e3;
+      border-radius: 4px;
+      padding: 6px 10px;
+      margin-bottom: 10px;
+      line-height: 1.45;
+    }
+
+    details.explainer summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: #1a56c4;
+    }
+
+    details.explainer ol {
+      padding-left: 18px;
+      margin: 6px 0;
+    }
+
+    details.explainer li {
+      margin-bottom: 4px;
+    }
+
+    .status-field-row {
+      border: 1px solid #e3e3e3;
+      border-radius: 4px;
+      background: #fff;
+      padding: 8px;
+      margin-bottom: 6px;
+    }
+
+    .status-field-row .row-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 4px;
+    }
+
+    .status-field-row input {
+      width: 100%;
+      padding: 5px 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 12px;
+      box-sizing: border-box;
+      margin-bottom: 5px;
+    }
+
+    .status-field-row .row-extra {
+      display: flex;
+      gap: 6px;
+    }
+
+    .status-field-row .row-extra .sf-extract {
+      flex: 3;
+    }
+
+    .status-field-row .row-extra .sf-label {
+      flex: 1;
+    }
+
+    .status-field-row .btn-remove {
+      background: none;
+      border: none;
+      color: #d33426;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0;
+    }
+
+    .test-result {
       margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      border: 1px solid #ddd;
+      background: #fff;
+      line-height: 1.5;
+    }
+
+    .test-result.ok { border-color: #34a853; background: #e6f4ea; }
+    .test-result.warn { border-color: #fbbc04; background: #fef7e0; }
+    .test-result.err { border-color: #ea4335; background: #fce8e6; }
+
+    .test-result dt {
+      font-weight: 600;
+      display: inline;
+    }
+
+    .test-result dd {
+      display: inline;
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .test-result .row {
+      margin: 0;
+    }
+
+    .banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+      border: 1px solid #fbbc04;
+      border-radius: 4px;
+      background: #fef7e0;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .banner .btn {
+      margin-left: 0;
+      white-space: nowrap;
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #444;
+      margin-bottom: 12px;
+      padding: 8px 10px;
+      border: 1px solid #e3e3e3;
+      border-radius: 4px;
+      background: #fafafa;
+    }
+
+    .settings-row label {
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .settings-row input {
+      width: 64px;
+      padding: 4px 6px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .settings-row .info-text {
+      margin: 0;
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <h1>TabStar</h1>
-  
-  <div id="patternList" class="pattern-list">
-    <div class="no-patterns">No patterns added yet.</div>
+  <h1>TabStar Status</h1>
+
+  <div id="staleBanner" class="banner hidden">
+    <span>The extension's files changed but the background script is still running the old version. Reload to apply the update.</span>
+    <button id="reloadExtension" class="btn btn-primary">Reload extension</button>
   </div>
-  
+
+  <div id="patternList" class="pattern-list">
+    <div class="no-patterns">No rules added yet.</div>
+  </div>
+
+  <div class="settings-row">
+    <label for="maxTitleLength">Max group title length:</label>
+    <input type="number" id="maxTitleLength" min="0" step="1" value="0">
+    <span class="info-text" id="maxTitleHint">0 = no limit. Long names are shortened with "…"; the status is always kept.</span>
+  </div>
+
   <div id="patternForm">
     <div class="form-group">
-      <label for="regexPattern">URL Regex Pattern:</label>
-      <input type="text" id="regexPattern" placeholder="e.g. github.com/([^/]+)">
+      <label for="presetSelect">Start from a preset:</label>
+      <select id="presetSelect">
+        <option value="">Choose a service (optional)</option>
+      </select>
+      <div class="info-text" id="presetHint"></div>
     </div>
-    
+
+    <h2>1. Which tabs?</h2>
+
     <div class="form-group">
-      <label for="groupName">Default Group Name:</label>
-      <input type="text" id="groupName" placeholder="e.g. GitHub">
-      <div class="info-text">This will be used if no capture groups are matched or if "Use Capture Group" is disabled</div>
+      <label for="ruleName">Rule Name:</label>
+      <input type="text" id="ruleName" placeholder="e.g. Jira tickets">
+      <div class="info-text">Only shown in the list above, so you can tell your rules apart.</div>
     </div>
-    
-    <div class="form-group checkbox-group">
-      <input type="checkbox" id="useCapture" checked>
-      <label for="useCapture">Use Capture Group as Group Name</label>
+
+    <div class="form-group">
+      <label for="regexPattern">URL Regex Pattern:</label>
+      <input type="text" id="regexPattern" placeholder="e.g. /browse/([A-Z]+-\d+)">
+      <div class="info-text">
+        A tab matches when this pattern is found in its URL (or, failing that, its title).
+        Wrap the part you want to reuse in the group title in parentheses <code>( )</code>.
+      </div>
     </div>
-    
+
+    <h2>2. What should the tab group be called?</h2>
+
+    <div class="form-group">
+      <label for="groupName">Tab Group Title:</label>
+      <input type="text" id="groupName" placeholder="e.g. $1">
+      <div class="info-text">
+        <code>$1</code> inserts the first part in parentheses, <code>$2</code> the second, and so on.
+        Example: pattern <code>/browse/([A-Z]+-\d+)</code> with title <code>$1</code> gives a group named <code>ABC-123</code>.
+        Plain text with no <code>$</code> gives every matching tab the same fixed title.
+      </div>
+    </div>
+
     <div class="form-group checkbox-group">
       <input type="checkbox" id="useRandomColor">
-      <label for="useRandomColor">Use Random Colors for Multiple Groups</label>
+      <label for="useRandomColor">Give each new group a random color</label>
     </div>
-    
+
     <div class="form-group">
       <label>Group Color:</label>
       <div class="color-options">
@@ -197,11 +464,82 @@
         <div class="color-option" data-color="cyan" style="background-color: #24C1E0;"></div>
       </div>
     </div>
-    
-    <button id="addPattern" class="btn btn-primary">Add Pattern</button>
-    <button id="applyToCurrent" class="btn">Apply to Current Tab</button>
+
+    <h2>3. Show a status from the page? (optional)</h2>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="checkbox-group">
+          <input type="checkbox" id="statusEnabled">
+          <label for="statusEnabled">Append the page's status to the group title</label>
+        </div>
+        <a class="help-link" id="helpLink" href="#" title="Full guide">Full guide</a>
+      </div>
+
+      <div id="statusFields" class="hidden">
+        <div class="info-text" style="margin-bottom:8px;">
+          The extension looks at the page, finds one element (for example the "In Progress" badge on a ticket),
+          and adds its text to the group title: <code>ABC-123</code> becomes <code>ABC-123 - In Progress</code>.
+          It keeps watching, so the title updates when the status changes.
+        </div>
+
+        <details class="explainer">
+          <summary>What is a CSS selector and how do I get one?</summary>
+          <p>
+            A CSS selector is the address of an element on a web page, the same thing web developers use to style it.
+            <code>#status-val</code> means "the element with id <em>status-val</em>";
+            <code>[data-testid="header-state"]</code> means "the element whose <em>data-testid</em> attribute is <em>header-state</em>".
+          </p>
+          <p>To find one for the status on your page:</p>
+          <ol>
+            <li>On the page, right-click the status text or badge and choose <strong>Inspect</strong>. Chrome DevTools opens with that element highlighted.</li>
+            <li>Look at the highlighted line. Prefer an attribute that looks hand-written, such as <code>id="..."</code>, <code>data-testid="..."</code> or <code>aria-label="..."</code>. Random-looking classes like <code>css-1x9kq2</code> break on the next release.</li>
+            <li>If that line has nothing useful, click the parent line just above it and check again.</li>
+            <li>Write the selector: <code>#the-id</code>, or <code>[data-testid="the-value"]</code>, or <code>[aria-label="the-label"]</code>.</li>
+            <li>Paste it below and click <strong>Test on Current Tab</strong>. The result tells you which element matched and what text it read.</li>
+          </ol>
+          <p>
+            You can list several selectors separated by commas; the first one that finds text wins.
+            Shortcut: in DevTools, right-click the element, then <strong>Copy › Copy selector</strong>. It works but is often fragile, so simplify it if you can.
+          </p>
+          <p>
+            If the element contains more words than you want (for example "Pipeline #123 passed"), add a
+            <strong>Keep only</strong> regex with parentheses around the part to keep, such as <code>#\d+\s+(\S+)</code>.
+            The test result shows both the raw text and what was kept.
+          </p>
+        </details>
+
+        <div class="form-group">
+          <label>Status fields:</label>
+          <div id="statusFieldList"></div>
+          <button type="button" id="addStatusField" class="btn">+ Add another status field</button>
+          <div class="info-text">
+            Each field reads one element. With several fields the values are joined, for example
+            <code>Open · CI passed</code> for a merge request and its pipeline.
+            <strong>Keep only</strong> is an optional regex: if it has parentheses, only that part is kept, so
+            <code>#\d+\s+(\S+)</code> turns "Pipeline #18395789 passed" into "passed".
+            <strong>Label</strong> is an optional prefix such as <code>CI</code>.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="statusOrigin">Site Origin (for page access):</label>
+          <input type="text" id="statusOrigin" placeholder="https://yourcompany.atlassian.net">
+          <div class="info-text">Chrome asks you to allow this site when you save or test. Pre-filled from the current tab.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button id="addPattern" class="btn btn-primary">Add Rule</button>
+      <button id="testRule" class="btn">Test on Current Tab</button>
+      <button id="applyToCurrent" class="btn">Apply to Current Tab</button>
+    </div>
+
+    <div id="testResult" class="test-result hidden"></div>
   </div>
-  
+
+  <script src="presets.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

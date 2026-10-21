@@ -1,0 +1,7 @@
+# Personal Claude Code settings; never ship or share
+.claude/
+
+# Local tooling / packaging output
+node_modules/
+dist/
+.DS_Store

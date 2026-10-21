@@ -1,12 +1,18 @@
 {
-  "name": "TabStar",
-  "version": "1.0",
+  "name": "TabStar Status",
+  "version": "1.4.0",
   "manifest_version": 3,
-  "description": "Automatically groups tabs based on URL regex patterns",
+  "minimum_chrome_version": "102",
+  "description": "Groups tabs by URL regex and appends a live status read from the page (e.g. Jira ticket status) to the tab group name",
   "permissions": [
     "tabs",
     "tabGroups",
-    "storage"
+    "storage",
+    "scripting"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
   ],
   "background": {
     "service_worker": "background.js"

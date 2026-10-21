@@ -20,7 +20,8 @@ jobs:
     - name: Zip the extension
       run: |
         mkdir -p dist
-        zip -r dist/chrome-extension-${{ env.VERSION }}.zip . -x ".github/*" ".git/*"
+        zip -r dist/chrome-extension-${{ env.VERSION }}.zip . \
+          -x ".github/*" ".git/*" ".gitignore" ".claude/*" "docs/*" "CLAUDE.md" "README.md" "dist/*"
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
